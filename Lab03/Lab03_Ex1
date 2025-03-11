@@ -1,0 +1,113 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const int MaxDegree = 10;  // Maximum degree for polynomials
+
+class Polynomial {
+private:
+    int degree;  // degree ≤ MaxDegree
+    float coef[MaxDegree + 1];  // Coefficients array
+
+public:
+    // Constructor
+    Polynomial(int d = 0) : degree(d), coef{} {}
+
+    // Input function
+    void input() {
+        cout << "Enter coefficients from highest degree to constant term:\n";
+        for (int i = 0; i <= degree; i++) {
+            cout << "Coefficient for x^" << (degree - i) << ": ";
+            cin >> coef[i];
+        }
+    }
+
+    // Output function
+    void display() const {
+        bool firstTerm = true;  // To handle the "+" sign placement
+        for (int i = 0; i <= degree; i++) {
+            if (coef[i] != 0) {  // Handle sparse case
+                if (!firstTerm && coef[i] > 0) cout << " + ";
+                if (coef[i] < 0) cout << " - ";
+                if (coef[i] != 0 && firstTerm) firstTerm = false;
+                cout << abs(coef[i]);
+                if (degree - i > 0) cout << "x^" << (degree - i);
+            }
+        }
+        cout << endl;
+    }
+
+    // Addition function
+    static Polynomial add(const Polynomial &p1, const Polynomial &p2) {
+        int maxDeg = max(p1.degree, p2.degree);
+        Polynomial sum(maxDeg);
+
+        for (int i = 0; i <= maxDeg; i++) {
+            float coef1 = (i <= p1.degree) ? p1.coef[p1.degree - i] : 0;
+            float coef2 = (i <= p2.degree) ? p2.coef[p2.degree - i] : 0;
+            sum.coef[maxDeg - i] = coef1 + coef2;
+        }
+        return sum;
+    }
+
+    // Multiplication function
+    static Polynomial multiply(const Polynomial &p1, const Polynomial &p2) {
+        int newDeg = p1.degree + p2.degree;
+        Polynomial product(newDeg);
+
+        for (int i = 0; i <= p1.degree; i++) {
+            for (int j = 0; j <= p2.degree; j++) {
+                product.coef[i + j] += p1.coef[i] * p2.coef[j];
+            }
+        }
+        return product;
+    }
+
+    // Evaluation function
+    float evaluate(float x) const {
+        float result = 0;
+        for (int i = 0; i <= degree; i++) {
+            result = result * x + coef[i];  // Horner's method
+        }
+        return result;
+    }
+};
+
+// Main function
+int main() {
+    int d1, d2;
+    cout << "Enter degree of first polynomial: ";
+    cin >> d1;
+    Polynomial p1(d1);
+    p1.input();
+
+    cout << "Enter degree of second polynomial: ";
+    cin >> d2;
+    Polynomial p2(d2);
+    p2.input();
+
+    cout << "\nFirst Polynomial: ";
+    p1.display();
+
+    cout << "Second Polynomial: ";
+    p2.display();
+
+    // Adding polynomials
+    Polynomial sum = Polynomial::add(p1, p2);
+    cout << "\nSum: ";
+    sum.display();
+
+    // Multiplying polynomials
+    Polynomial product = Polynomial::multiply(p1, p2);
+    cout << "Product: ";
+    product.display();
+
+    // Evaluating polynomial
+    float x;
+    cout << "\nEnter a value to evaluate the first polynomial: ";
+    cin >> x;
+    cout << "P1(" << x << ") = " << p1.evaluate(x) << endl;
+    cout << "P2(" << x << ") = " << p2.evaluate(x) << endl;
+
+    return 0;
+}
